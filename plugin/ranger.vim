@@ -120,5 +120,10 @@ function! s:RangerChooser(dirname)
     endif
 endfunction
 
-au BufEnter * silent call s:RangerChooser(expand("<amatch>"))
+
+augroup ranger
+    autocmd BufEnter term://*ranger* start | set nomodified
+    autocmd BufEnter * silent call s:RangerChooser(expand("<amatch>"))
+augroup END
+
 let g:loaded_netrwPlugin = 'disable'
