@@ -122,7 +122,7 @@ endfunction
 
 
 augroup ranger
-    autocmd BufEnter term://*ranger* start | set nomodified
+    autocmd BufEnter term://*ranger* set nomodified | start | set nomodified
     autocmd BufEnter * silent call s:RangerChooser(expand("<amatch>"))
 augroup END
 
