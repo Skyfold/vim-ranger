@@ -120,10 +120,41 @@ function! s:RangerChooser(dirname)
     endif
 endfunction
 
-
 augroup ranger
-    autocmd BufEnter term://*ranger* set nomodified | start | set nomodified
     autocmd BufEnter * silent call s:RangerChooser(expand("<amatch>"))
 augroup END
 
 let g:loaded_netrwPlugin = 'disable'
+
+if empty(maparg('-', 'n'))
+  nmap - :call <SID>opendir('edit')<CR>
+endif
+
+let s:dotfiles = '\(^\|\s\s\)\zs\.\S\+'
+
+function! s:opendir(cmd) abort
+  let df = ','.s:dotfiles
+  if expand('%:t')[0] ==# '.' && g:netrw_list_hide[-strlen(df):-1] ==# df
+    let g:netrw_list_hide = g:netrw_list_hide[0 : -strlen(df)-1]
+  endif
+  if &filetype ==# 'netrw'
+    let currdir = fnamemodify(b:netrw_curdir, ':t')
+    execute s:netrw_up
+    call s:seek(currdir)
+  elseif expand('%') =~# '^$\|^term:[\/][\/]'
+    execute a:cmd '.'
+  else
+    execute a:cmd '%:h/'
+    call s:seek(expand('#:t'))
+  endif
+endfunction
+
+function! s:seek(file) abort
+  if get(b:, 'netrw_liststyle') == 2
+    let pattern = '\%(^\|\s\+\)\zs'.escape(a:file, '.*[]~\').'[/*|@=]\=\%($\|\s\+\)'
+  else
+    let pattern = '^\%(| \)*'.escape(a:file, '.*[]~\').'[/*|@=]\=\%($\|\t\)'
+  endif
+  call search(pattern, 'wc')
+  return pattern
+endfunction
